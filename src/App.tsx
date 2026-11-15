@@ -1,11 +1,14 @@
 import { Route, Routes } from "react-router"
 
 import { ScrollToTop, SiteFooter, SiteHeader } from "@/components/layout"
+import { usePageTitle } from "@/components/page-title"
 import AlgoDetailPage from "@/pages/algo-detail"
 import HomePage from "@/pages/home"
 import NotFoundPage from "@/pages/not-found"
 
 export function App() {
+  usePageTitle()
+
   return (
     <div className="flex min-h-svh flex-col bg-background">
       <ScrollToTop />
