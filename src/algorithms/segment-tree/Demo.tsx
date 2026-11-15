@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react"
 import {
   ArrowDownToLine,
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Pause,
@@ -13,10 +12,8 @@ import {
   SkipForward,
   Trash2,
 } from "lucide-react"
-import { Link } from "react-router"
 
 import { Button } from "@/components/ui/button"
-import { ACCENT_CLASSES, getAlgorithm } from "@/lib/algorithms"
 import { cn } from "@/lib/utils"
 
 import { useStepKeys, useStepper } from "@/hooks/use-stepper"
@@ -33,9 +30,6 @@ const SPEEDS = [
 const MAX_N = 10
 
 export default function SegmentTreeDemo() {
-  const meta = getAlgorithm("segment-tree")!
-  const accent = ACCENT_CLASSES[meta.accent]
-
   const [base, setBase] = useState<number[]>(PRESETS[0].base)
   const [ops, setOps] = useState<Op[]>(PRESETS[0].ops)
   const [presetName, setPresetName] = useState(PRESETS[0].name)
@@ -105,34 +99,7 @@ export default function SegmentTreeDemo() {
   const currentOpIndex = current?.opIndex ?? -1
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-5 py-8">
-      <div className="mb-6 space-y-4">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-3.5" /> 全部算法
-        </Link>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{meta.title}</h1>
-              <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset", accent.chip)}>
-                {meta.complexity}
-              </span>
-            </div>
-            <p className="font-mono text-xs text-muted-foreground">{meta.subtitle}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {meta.tags.map((t) => (
-              <span key={t} className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
+    <div className="pt-4">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         {/* 树 */}
         <section className="flex flex-col overflow-hidden rounded-3xl border bg-card">

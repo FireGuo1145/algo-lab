@@ -1,10 +1,34 @@
-import { Link } from "react-router"
+import { useMemo, useState } from "react"
+import { Link, useLocation, useSearchParams } from "react-router"
 import { ArrowUpRight, Sparkles, Timer, Waypoints } from "lucide-react"
 
-import { ACCENT_CLASSES, ALGORITHMS } from "@/lib/algorithms"
+import { ACCENT_CLASSES, ALGORITHMS, CATEGORIES, getDependencies, getDependents, type Category } from "@/lib/algorithms"
 import { cn } from "@/lib/utils"
 
 export default function HomePage() {
+  const [params, setParams] = useSearchParams()
+  // 依赖 location.key，保证每次切换筛选都重新计算（setParams 自身状态有时不触发重渲染）
+  const { key: navKey } = useLocation()
+  const raw = params.get("category")
+  const active = CATEGORIES.some((c) => c.id === raw) ? (raw as Category) : null
+  const list = useMemo(
+    () => (active ? ALGORITHMS.filter((a) => a.category === active) : ALGORITHMS),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [active, navKey, params]
+  )
+  const [query, setQuery] = useState("")
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return list
+    return list.filter(
+      (a) =>
+        a.title.toLowerCase().includes(q) ||
+        a.subtitle.toLowerCase().includes(q) ||
+        a.tags.some((t) => t.toLowerCase().includes(q)) ||
+        a.description.toLowerCase().includes(q)
+    )
+  }, [list, query])
+
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10 sm:py-14">
       {/* Hero */}
@@ -31,15 +55,51 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 列表 */}
+      {/* 筛选 */}
       <section>
-        <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-lg font-semibold tracking-tight">算法列表</h2>
-          <span className="text-[11px] text-muted-foreground">持续更新中</span>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-lg font-semibold tracking-tight">
+            算法列表 <span className="font-mono text-sm font-normal text-muted-foreground">({filtered.length})</span>
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="搜索名称 / 标签…"
+              className="h-8 w-40 rounded-xl border bg-card px-2.5 text-xs placeholder:text-muted-foreground/60 focus:border-ring focus:ring-2 focus:ring-ring/30 focus:outline-none sm:w-52"
+              aria-label="搜索算法"
+            />
+            <div className="flex flex-wrap items-center gap-0.5 rounded-xl border bg-muted/40 p-0.5">
+              <button
+                onClick={() => setParams({})}
+                className={cn(
+                  "rounded-lg px-2 py-1 text-xs transition-colors",
+                  !active ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                全部
+              </button>
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setParams({ category: c.id })}
+                  className={cn(
+                    "rounded-lg px-2 py-1 text-xs transition-colors",
+                    active === c.id ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
-          {ALGORITHMS.map((algo) => {
+          {filtered.map((algo) => {
             const accent = ACCENT_CLASSES[algo.accent]
+            const deps = getDependencies(algo.slug)
+            const dependents = getDependents(algo.slug)
             return (
               <Link
                 key={algo.slug}
@@ -52,7 +112,7 @@ export default function HomePage() {
                     accent.glow
                   )}
                 />
-                <div className="relative">
+                <div className="relative flex h-full flex-col">
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1.5">
                       <h3 className="text-base font-semibold tracking-tight">{algo.title}</h3>
@@ -65,39 +125,40 @@ export default function HomePage() {
                   <p className="mt-3 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
                     {algo.description}
                   </p>
-                  <div className="mt-4 flex flex-wrap items-center gap-1.5">
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 font-mono text-[11px] ring-1 ring-inset",
-                        accent.chip
+                  {(deps.length > 0 || dependents.length > 0) && (
+                    <div className="mt-3 flex flex-wrap items-center gap-1 text-[10.5px] text-muted-foreground/80">
+                      {deps.length > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-muted/70 px-1.5 py-0.5">
+                          依赖 {deps.map((d) => d.title.split(" · ")[0]).join("、")}
+                        </span>
                       )}
-                    >
+                      {dependents.length > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-muted/70 px-1.5 py-0.5">
+                          被 {dependents.length} 个算法使用
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-4">
+                    <span className={cn("rounded-full px-2 py-0.5 font-mono text-[11px] ring-1 ring-inset", accent.chip)}>
                       {algo.complexity}
                     </span>
                     {algo.tags.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground"
-                      >
+                      <span key={t} className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
                         {t}
                       </span>
                     ))}
-                  </div>
-                  <div className="mt-4 font-mono text-[11px] text-muted-foreground/70">
-                    /algo/{algo.slug}
                   </div>
                 </div>
               </Link>
             )
           })}
 
-          {/* 占位卡片 */}
-          <div className="flex min-h-48 flex-col items-center justify-center rounded-3xl border border-dashed p-5 text-center">
-            <p className="text-sm text-muted-foreground">更多算法即将加入</p>
-            <p className="mt-1 text-[11px] text-muted-foreground/70">
-              排序 / 图算法 / 数据结构 / 动态规划…
-            </p>
-          </div>
+          {filtered.length === 0 && (
+            <div className="flex min-h-40 items-center justify-center rounded-3xl border border-dashed p-5 text-sm text-muted-foreground sm:col-span-2">
+              没有匹配的算法
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -81,8 +81,12 @@ export function useStepKeys(stepper: { next: () => void; prev: () => void; toggl
   const { next, prev, toggle } = stepper
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null
-      if (target && target.closest("input, textarea, select, [contenteditable='true']")) return
+      const target = e.target
+      if (
+        target instanceof Element &&
+        target.closest("input, textarea, select, [contenteditable='true']")
+      )
+        return
       if (e.metaKey || e.ctrlKey || e.altKey) return
       if (e.key === "ArrowRight") next()
       else if (e.key === "ArrowLeft") prev()
