@@ -3,6 +3,7 @@ import type { ComponentType } from "react"
 import BITDemo from "@/algorithms/bit/Demo"
 import DsuDemo from "@/algorithms/dsu/Demo"
 import DsuOnTreeDemo from "@/algorithms/dsu-on-tree/Demo"
+import HldDemo from "@/algorithms/hld/Demo"
 import LcaDemo from "@/algorithms/lca/Demo"
 import MstDemo from "@/algorithms/mst/Demo"
 import SegmentTreeDemo from "@/algorithms/segment-tree/Demo"
@@ -114,6 +115,19 @@ export const ALGORITHMS: AlgorithmMeta[] = [
     accent: "sky",
     deps: ["st-table"],
     demo: LcaDemo,
+  },
+  {
+    slug: "heavy-light-decomposition",
+    title: "重链剖分 · 树链剖分路径查询",
+    subtitle: "Heavy-Light Decomposition · Path Query on Trees",
+    description:
+      "按子树大小选出重儿子，把树剖成若干条重链并给每个点分配 dfs 序，使重链与子树都变成连续区间；路径查询时沿链跳转并区间求和。",
+    tags: ["树", "重链剖分", "dfs 序"],
+    category: "tree",
+    complexity: "预处理 O(n) · 路径 O(log² n)",
+    accent: "amber",
+    deps: ["lca"],
+    demo: HldDemo,
   },
   {
     slug: "dsu-on-tree",
