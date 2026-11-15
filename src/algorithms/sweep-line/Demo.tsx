@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import {
   ArrowLeft,
   ChevronLeft,
@@ -16,6 +16,7 @@ import {
 import { Link } from "react-router"
 
 import { Button } from "@/components/ui/button"
+import { useStepKeys, useStepper } from "@/hooks/use-stepper"
 import { getAlgorithm, ACCENT_CLASSES } from "@/lib/algorithms"
 import { cn } from "@/lib/utils"
 
@@ -39,65 +40,21 @@ export default function SweepLineDemo() {
   const [rects, setRects] = useState<Rect[]>(PRESETS[0].rects)
   const [presetName, setPresetName] = useState<string>(PRESETS[0].name)
   const [selected, setSelected] = useState<number | null>(null)
-  const [stepIndex, setStepIndex] = useState(0)
-  const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
   const [showAdvanced, setShowAdvanced] = useState(true)
 
   const sim = useMemo(() => simulate(rects), [rects])
   const steps = sim.steps
+  const stepper = useStepper({ count: steps.length, interval: SPEEDS[speed].ms })
+  const { step: stepIndex, atEnd, playing } = stepper
+  useStepKeys(stepper)
   const current = steps[Math.min(stepIndex, steps.length - 1)]
-  const atEnd = stepIndex >= steps.length - 1
-
-  // 自动播放
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => {
-    if (!playing) return
-    if (atEnd) {
-      setPlaying(false)
-      return
-    }
-    timer.current = setTimeout(() => setStepIndex((i) => Math.min(i + 1, steps.length - 1)), SPEEDS[speed].ms)
-    return () => {
-      if (timer.current) clearTimeout(timer.current)
-    }
-  }, [playing, stepIndex, speed, steps.length, atEnd])
-
-  // 键盘控制
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null
-      if (target && target.closest("input, textarea, select, [contenteditable='true']")) return
-      if (e.key === "ArrowRight") {
-        setPlaying(false)
-        setStepIndex((i) => Math.min(i + 1, steps.length - 1))
-      } else if (e.key === "ArrowLeft") {
-        setPlaying(false)
-        setStepIndex((i) => Math.max(i - 1, 0))
-      } else if (e.key === " ") {
-        e.preventDefault()
-        togglePlay()
-      }
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  })
 
   function updateRects(next: Rect[], name?: string) {
     setRects(next)
     setPresetName(name ?? "")
     setSelected(null)
-    setStepIndex(0)
-    setPlaying(false)
-  }
-
-  function togglePlay() {
-    if (atEnd) {
-      setStepIndex(0)
-      setPlaying(true)
-      return
-    }
-    setPlaying((p) => !p)
+    stepper.reset()
   }
 
   const areaSoFar = current?.totalArea ?? 0
@@ -184,10 +141,7 @@ export default function SweepLineDemo() {
                 variant="ghost"
                 size="icon"
                 aria-label="回到开始"
-                onPress={() => {
-                  setPlaying(false)
-                  setStepIndex(0)
-                }}
+                onPress={stepper.first}
               >
                 <SkipBack />
               </Button>
@@ -195,14 +149,11 @@ export default function SweepLineDemo() {
                 variant="outline"
                 size="icon"
                 aria-label="上一步"
-                onPress={() => {
-                  setPlaying(false)
-                  setStepIndex((i) => Math.max(i - 1, 0))
-                }}
+                onPress={stepper.prev}
               >
                 <ChevronLeft />
               </Button>
-              <Button size="lg" className="min-w-24" onPress={togglePlay} aria-label={playing ? "暂停" : "播放"}>
+              <Button size="lg" className="min-w-24" onPress={stepper.toggle} aria-label={playing ? "暂停" : "播放"}>
                 {playing ? <Pause /> : <Play />}
                 {playing ? "暂停" : atEnd ? "重播" : "播放"}
               </Button>
@@ -210,10 +161,7 @@ export default function SweepLineDemo() {
                 variant="outline"
                 size="icon"
                 aria-label="下一步"
-                onPress={() => {
-                  setPlaying(false)
-                  setStepIndex((i) => Math.min(i + 1, steps.length - 1))
-                }}
+                onPress={stepper.next}
               >
                 <ChevronRight />
               </Button>
@@ -221,10 +169,7 @@ export default function SweepLineDemo() {
                 variant="ghost"
                 size="icon"
                 aria-label="跳到结尾"
-                onPress={() => {
-                  setPlaying(false)
-                  setStepIndex(steps.length - 1)
-                }}
+                onPress={stepper.end}
               >
                 <SkipForward />
               </Button>
@@ -252,8 +197,8 @@ export default function SweepLineDemo() {
               max={steps.length - 1}
               value={Math.min(stepIndex, steps.length - 1)}
               onChange={(e) => {
-                setPlaying(false)
-                setStepIndex(Number(e.target.value))
+                stepper.pause()
+                stepper.setStep(Number(e.target.value))
               }}
               className="mt-3 w-full accent-primary"
               aria-label="步骤进度"
@@ -466,8 +411,8 @@ export default function SweepLineDemo() {
                   <button
                     key={s.index}
                     onClick={() => {
-                      setPlaying(false)
-                      setStepIndex(s.index)
+                      stepper.pause()
+                      stepper.setStep(s.index)
                     }}
                     className={cn(
                       "flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left font-mono text-[11px] transition-colors hover:bg-muted",

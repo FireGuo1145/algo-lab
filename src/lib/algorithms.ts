@@ -1,5 +1,6 @@
 import type { ComponentType } from "react"
 
+import SegmentTreeDemo from "@/algorithms/segment-tree/Demo"
 import SweepLineDemo from "@/algorithms/sweep-line/Demo"
 
 export type AlgorithmMeta = {
@@ -28,6 +29,17 @@ export const ALGORITHMS: AlgorithmMeta[] = [
     complexity: "O(n log n)",
     accent: "sky",
     demo: SweepLineDemo,
+  },
+  {
+    slug: "segment-tree",
+    title: "线段树 · 区间加与区间和",
+    subtitle: "Segment Tree · Range Add & Range Sum",
+    description:
+      "用懒标记（lazy tag）在 O(log n) 内完成区间加与区间求和，逐步展示递归拆分、pushDown 下传和 pull 回溯的全过程。",
+    tags: ["数据结构", "线段树", "懒标记"],
+    complexity: "O(log n)",
+    accent: "emerald",
+    demo: SegmentTreeDemo,
   },
 ]
 
