@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import { Link, useLocation } from "react-router"
 import { Combine } from "lucide-react"
 
+import { RepoLink } from "@/components/repo-link"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export function SiteHeader() {
@@ -28,6 +29,8 @@ export function SiteHeader() {
           >
             算法列表
           </Link>
+          <div className="mx-1 hidden h-5 w-px bg-border sm:block" aria-hidden="true" />
+          <RepoLink />
           <ThemeToggle />
         </nav>
       </div>
