@@ -15,6 +15,8 @@ export function usePageTitle() {
     let title: string
     if (algo) {
       title = `${algo.title} · ${SITE_TITLE}`
+    } else if (pathname === "/learning-tree") {
+      title = `算法学习树 · ${SITE_TITLE}`
     } else if (pathname === "/") {
       title = SITE_TITLE
     } else {

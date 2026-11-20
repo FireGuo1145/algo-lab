@@ -11,12 +11,12 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-5">
-        <Link to="/" className="group flex items-center gap-2.5">
+        <Link to="/" aria-label="Algo Lab 首页" className="group flex items-center gap-2.5">
           <span className="flex size-7 items-center justify-center rounded-lg bg-foreground text-background transition-transform group-hover:-rotate-12">
             <Combine className="size-4" />
           </span>
           <span className="text-sm font-semibold tracking-tight">
-            算法演示<span className="text-muted-foreground"> · Algo Lab</span>
+            <span className="hidden sm:inline">算法演示<span className="text-muted-foreground"> · Algo Lab</span></span>
           </span>
         </Link>
         <nav className="flex items-center gap-2">
@@ -28,6 +28,13 @@ export function SiteHeader() {
             }
           >
             算法列表
+          </Link>
+          <Link
+            to="/learning-tree"
+            aria-current={pathname === "/learning-tree" ? "page" : undefined}
+            className={"rounded-xl px-2.5 py-1 text-sm whitespace-nowrap transition-colors hover:text-foreground " + (pathname === "/learning-tree" ? "text-foreground" : "text-muted-foreground")}
+          >
+            学习树
           </Link>
           <div className="mx-1 hidden h-5 w-px bg-border sm:block" aria-hidden="true" />
           <RepoLink />
