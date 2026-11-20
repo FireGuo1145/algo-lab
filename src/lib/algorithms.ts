@@ -6,6 +6,7 @@ import DsuOnTreeDemo from "@/algorithms/dsu-on-tree/Demo"
 import HldDemo from "@/algorithms/hld/Demo"
 import LcaDemo from "@/algorithms/lca/Demo"
 import MstDemo from "@/algorithms/mst/Demo"
+import MoDemo from "@/algorithms/mo/Demo"
 import SegmentTreeDemo from "@/algorithms/segment-tree/Demo"
 import StTableDemo from "@/algorithms/st-table/Demo"
 import SweepLineDemo from "@/algorithms/sweep-line/Demo"
@@ -42,6 +43,17 @@ export const CATEGORIES: { id: Category; label: string }[] = [
 ]
 
 export const ALGORITHMS: AlgorithmMeta[] = [
+  {
+    slug: "mo-algorithm",
+    title: "莫队 · 区间不同数字个数",
+    subtitle: "Mo's Algorithm · Offline Range Distinct Queries",
+    description: "将查询按左端点分块并交替排序右端点，通过 L/R 指针移动维护频次桶，离线回答区间不同数字个数。",
+    tags: ["离线查询", "分块", "莫队"],
+    category: "data-structure",
+    complexity: "O(m log m + (n+m)√n)",
+    accent: "violet",
+    demo: MoDemo,
+  },
   {
     slug: "rectangle-union-area",
     title: "扫描线 · 矩形面积并",
